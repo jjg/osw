@@ -12,4 +12,14 @@ I also mention executables (X) and federation.  X will probably work a lot like 
 
 Federation is a little less defined.  There have been a number of experiments with federation from simple static lists of federated hosts to dynamic distributed hashtables and even blockchains, but regardless of the network implementation the two essential components are the exchange of inodes and the ability to distribute blocks.  For the first pass I'm tempted to pick something simple and safe and isolate the federation networking so that we can try a few things with minimal impact at the API level.  I left-out any discussion of "pluggable" back-ends (the ability to easily switch from say storing blocks on local disks to storing them in say S3) but isolating the federation code at the same level might make a lot of sense.
 
+Enough chit-chat, let's make something.
+
+### API
+
+#### Headers/parameters
+These values can be specified as either [HTTP Headers]() or [URL Parameters]().  If specified as headers, terms must be separated by `-`, if specified as parameters, separators must be `_`.  Parameters must omit any leading `x-` notation which is required for non-standard HTTP headers.
+
+`Authorization`
+This header is required for all requests to a `private` resource.
+
 
