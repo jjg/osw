@@ -1,5 +1,59 @@
 # Journal
 
+## 11282020
+
+Preston came up with a very interesting idea while discussing ways to make public/private settings more simple: multi-dimensional URL's.
+
+Simply put, 2D URL's augment regular one-dimensional URL's by adding operations that are invisible to the location the URL points to.  It's easier to understand with an example.
+
+Take the traditional URL that points to a file:
+
+```
+POST http://foo.com/bar/baz.txt
+```
+
+If we are storing a file at this URL and we want to make it private, we include `private` in the querystring or the `x-private` header.  In a 2D URL, we include this directly in the path like so:
+
+```
+POST http://foo.com/bar/..private/baz.txt
+```
+
+The `..` in front of `..private` accesses the second dimension of the URL, where the `private` operation lives.  This doesn't change the _location_ aspect of the url, so a request to
+
+```
+GET http://foo.com/bar/baz.txt
+```
+
+Will access the same file created by the previous request, but will still require authentication because the `private` operation was used when the file was created.
+
+The reason for this is that operations exist in a second dimension:
+
+```
+Dimension 2:                         ..private
+Dimension 1: POST http://foo.com/bar/         /baz.txt
+```
+
+Operations can be stacked, so for example:
+
+```
+POST http://foo.com/bar/..encrypted/..private/baz.txt
+```
+
+Would encrypt the blocks stored on disk and mark the path private.
+
+This might seem like a breaking change to the URL as it should only be a pointer to a resource, but there is a precedent for adding a second dimension; a URL's `method` and `protocol` exist in this dimension already.
+
+I have a few ideas about how to implement these new operations.  Instead of building a fixed list of operations into `OSW`, they could be written as xfiles (executable files stored like any other file) either in a special namespace or perhaps pointed to by name in some configuration file.
+
+When a URL is parsed, the first step is to separate the dimensions so the resource pointer component of the URL can be used to identify the source (`GET`) or destination (`POST`, `PUT`) of the request, then operations are connected to the stream.  
+
+There are a few open questions:
+* Is it ok to use `..` to access the second dimension or should some other sequence be used (maybe `..` is reserved or might cause unexpected behavior?)
+* Does the position (as opposed to the sequence) of operations within the path matter?
+* Does the 2D URL represent "state" that needs to be preserved (say, in the inode) or will it always be represented by what is persisted (a private file, compressed blocks, an audio transformation, etc.)?
+
+
+
 ## 11242020
 
 Wrote the [kickoff post](https://jasongullickson.com/osw-operating-system-for-the-web.html) for OSW.  Still noodling on exactly where to get started, but probably with writing a spec for the API, ideally something that can be used to create some automated tests (perhaps [openapi](https://learn.openapis.org/)?) so we can do this in proper TDD-style, but without dragging-in a bunch of tooling and dependencies.  I really want this to be simple and fun to work on and I don't want a bunch of stuff that makes development a headache.
